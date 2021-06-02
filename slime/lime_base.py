@@ -14,6 +14,7 @@ class LimeBase(object):
                  verbose=False,
                  random_state=None):
         """Init function
+
         Args:
             kernel_fn: function that transforms an array of distances into an
                         array of proximity values (floats).
@@ -29,9 +30,11 @@ class LimeBase(object):
     @staticmethod
     def generate_lars_path(weighted_data, weighted_labels):
         """Generates the lars path for weighted data.
+
         Args:
             weighted_data: data that has been weighted by kernel
             weighted_label: labels, weighted by kernel
+
         Returns:
             (alphas, coefs), both are arrays corresponding to the
             regularization parameter and coefficients, respectively
@@ -140,6 +143,7 @@ class LimeBase(object):
                                    feature_selection='auto',
                                    model_regressor=None):
         """Takes perturbed data, labels and distances, returns explanation.
+
         Args:
             neighborhood_data: perturbed data, 2d array. first element is
                                assumed to be the original data point.
@@ -163,6 +167,7 @@ class LimeBase(object):
                 Defaults to Ridge regression if None. Must have
                 model_regressor.coef_ and 'sample_weight' as a parameter
                 to model_regressor.fit()
+
         Returns:
             (intercept, exp, score, local_pred):
             intercept is a float.

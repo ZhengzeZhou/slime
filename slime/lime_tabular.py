@@ -20,8 +20,8 @@ from lime.discretize import DecileDiscretizer
 from lime.discretize import EntropyDiscretizer
 from lime.discretize import BaseDiscretizer
 from lime.discretize import StatsDiscretizer
-from lime import explanation
-from lime import lime_base
+from . import explanation
+from . import lime_base
 
 
 class TableDomainMapper(explanation.DomainMapper):
@@ -31,6 +31,7 @@ class TableDomainMapper(explanation.DomainMapper):
                  categorical_features, discretized_feature_names=None,
                  feature_indexes=None):
         """Init.
+
         Args:
             feature_names: list of feature names, in order
             feature_values: list of strings with the values of the original row
@@ -52,8 +53,10 @@ class TableDomainMapper(explanation.DomainMapper):
 
     def map_exp_ids(self, exp):
         """Maps ids to feature names.
+
         Args:
             exp: list of tuples [(id, weight), (id,weight)]
+
         Returns:
             list of tuples (feature_name, weight)
         """
@@ -70,6 +73,7 @@ class TableDomainMapper(explanation.DomainMapper):
                                 show_table=True,
                                 show_all=False):
         """Shows the current example in a table format.
+
         Args:
              exp: list of tuples [(id, weight), (id,weight)]
              label: label id (integer)
@@ -137,6 +141,7 @@ class LimeTabularExplainer(object):
                  random_state=None,
                  training_data_stats=None):
         """Init function.
+
         Args:
             training_data: numpy 2d array
             mode: "classification" or "regression"
@@ -302,10 +307,12 @@ class LimeTabularExplainer(object):
                          model_regressor=None,
                          sampling_method='gaussian'):
         """Generates explanations for a prediction.
+
         First, we generate neighborhood data by randomly perturbing features
         from the instance (see __data_inverse). We then learn locally weighted
         linear models on this neighborhood data to explain each of the classes
         in an interpretable way (see lime_base.py).
+
         Args:
             data_row: 1d numpy array or scipy.sparse matrix, corresponding to a row
             predict_fn: prediction function. For classifiers, this should be a
@@ -328,6 +335,7 @@ class LimeTabularExplainer(object):
                 and 'sample_weight' as a parameter to model_regressor.fit()
             sampling_method: Method to sample synthetic data. Defaults to Gaussian
                 sampling. Can also use Latin Hypercube Sampling.
+
         Returns:
             An Explanation object (see explanation.py) with the corresponding
             explanations.
@@ -469,16 +477,19 @@ class LimeTabularExplainer(object):
                        num_samples,
                        sampling_method):
         """Generates a neighborhood around a prediction.
+
         For numerical features, perturb them by sampling from a Normal(0,1) and
         doing the inverse operation of mean-centering and scaling, according to
         the means and stds in the training data. For categorical features,
         perturb by sampling according to the training distribution, and making
         a binary feature that is 1 when the value is the same as the instance
         being explained.
+
         Args:
             data_row: 1d numpy array, corresponding to a row
             num_samples: size of the neighborhood to learn the linear model
             sampling_method: 'gaussian' or 'lhs'
+
         Returns:
             A tuple (data, inverse), where:
                 data: dense num_samples * K matrix, where categorical features
@@ -573,10 +584,13 @@ class RecurrentTabularExplainer(LimeTabularExplainer):
     input shape is (n_samples, n_timesteps, n_features). This class
     just extends the LimeTabularExplainer class and reshapes the training
     data and feature names such that they become something like
+
     (val1_t1, val1_t2, val1_t3, ..., val2_t1, ..., valn_tn)
+
     Each of the methods that take data reshape it appropriately,
     so you can pass in the training/testing data exactly as you
     would to the recurrent neural network.
+
     """
 
     def __init__(self, training_data, mode="classification",
@@ -671,10 +685,12 @@ class RecurrentTabularExplainer(LimeTabularExplainer):
                          top_labels=None, num_features=10, num_samples=5000,
                          distance_metric='euclidean', model_regressor=None):
         """Generates explanations for a prediction.
+
         First, we generate neighborhood data by randomly perturbing features
         from the instance (see __data_inverse). We then learn locally weighted
         linear models on this neighborhood data to explain each of the classes
         in an interpretable way (see lime_base.py).
+
         Args:
             data_row: 2d numpy array, corresponding to a row
             classifier_fn: classifier prediction probability function, which
@@ -691,6 +707,7 @@ class RecurrentTabularExplainer(LimeTabularExplainer):
                 to Ridge regression in LimeBase. Must have
                 model_regressor.coef_ and 'sample_weight' as a parameter
                 to model_regressor.fit()
+
         Returns:
             An Explanation object (see explanation.py) with the corresponding
             explanations.
