@@ -21,7 +21,7 @@ from lime.discretize import EntropyDiscretizer
 from lime.discretize import BaseDiscretizer
 from lime.discretize import StatsDiscretizer
 from . import explanation
-from slime.slime import lime_base
+from . import lime_base
 
 
 class TableDomainMapper(explanation.DomainMapper):
