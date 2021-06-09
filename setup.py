@@ -10,6 +10,7 @@ setup(name='slime',
       packages=['slime'],
       python_requires='>=3.5',
       install_requires=[
+          'lime',
           'matplotlib',
           'numpy',
           'scipy',
