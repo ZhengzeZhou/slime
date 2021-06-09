@@ -30,7 +30,7 @@ class LimeBase(object):
         self.random_state = check_random_state(random_state)
 
     @staticmethod
-    def generate_lars_path(weighted_data, weighted_labels, testing=False):
+    def generate_lars_path(weighted_data, weighted_labels, testing=False, alpha=0.05):
         """Generates the lars path for weighted data.
 
         Args:
@@ -46,15 +46,16 @@ class LimeBase(object):
             alphas, _, coefs = lars_path(x_vector,
                                          weighted_labels,
                                          method='lasso',
-                                         verbose=False)
+                                         verbose=False,
+                                         alpha=alpha)
             return alphas, coefs
         else:
-            alphas, active, coefs, test_result = lars_path(x_vector,
+            alphas, _, coefs, test_result = lars_path(x_vector,
                                                            weighted_labels,
                                                            method='lasso',
                                                            verbose=False,
                                                            testing=testing)
-            return alphas, active, coefs, test_result   
+            return alphas, coefs, test_result   
 
     def forward_selection(self, data, labels, weights, num_features):
         """Iteratively adds features to the model"""
@@ -77,7 +78,7 @@ class LimeBase(object):
             used_features.append(best)
         return np.array(used_features)
 
-    def feature_selection(self, data, labels, weights, num_features, method, testing=False):
+    def feature_selection(self, data, labels, weights, num_features, method, testing=False, alpha=0.05):
         """Selects features for the model. see explain_instance_with_data to
            understand the parameters."""
         if method == 'none':
@@ -153,14 +154,16 @@ class LimeBase(object):
                 # weighted_labels = Yscaler.transform(weighted_labels.reshape(-1, 1)).ravel()
 
                 nonzero = range(weighted_data.shape[1])
-                alphas, active, coefs, test_result = self.generate_lars_path(weighted_data,
-                                                   weighted_labels, testing=True)
+                alphas, coefs, test_result = self.generate_lars_path(weighted_data,
+                                                                     weighted_labels, 
+                                                                     testing=True,
+                                                                     alpha=alpha)
                 for i in range(len(coefs.T) - 1, 0, -1):
                     nonzero = coefs.T[i].nonzero()[0]
                     if len(nonzero) <= num_features:
                         break
                 used_features = nonzero
-                return used_features, active, test_result
+                return used_features, test_result
         elif method == 'auto':
             if num_features <= 6:
                 n_method = 'forward_selection'
@@ -248,8 +251,10 @@ class LimeBase(object):
                                    label,
                                    num_features,
                                    feature_selection='lasso_path',
-                                   model_regressor=None):
-        """Takes perturbed data, labels and distances, returns explanation.
+                                   model_regressor=None,
+                                   alpha=0.05):
+        """Takes perturbed data, labels and distances, returns explanation. 
+            This is a helper function for slime.
 
         Args:
             neighborhood_data: perturbed data, 2d array. first element is
@@ -274,6 +279,7 @@ class LimeBase(object):
                 Defaults to Ridge regression if None. Must have
                 model_regressor.coef_ and 'sample_weight' as a parameter
                 to model_regressor.fit()
+            alpha: significance level of hypothesis testing.
 
         Returns:
             (intercept, exp, score, local_pred):
@@ -286,12 +292,13 @@ class LimeBase(object):
         """
         weights = self.kernel_fn(distances)
         labels_column = neighborhood_labels[:, label]
-        used_features, active, test_result = self.feature_selection(neighborhood_data,
-                                               labels_column,
-                                               weights,
-                                               num_features,
-                                               feature_selection,
-                                               testing = True)
+        used_features, test_result = self.feature_selection(neighborhood_data,
+                                                                    labels_column,
+                                                                    weights,
+                                                                    num_features,
+                                                                    feature_selection,
+                                                                    testing=True,
+                                                                    alpha=alpha)
         if model_regressor is None:
             model_regressor = Ridge(alpha=1, fit_intercept=True,
                                     random_state=self.random_state)
@@ -311,5 +318,5 @@ class LimeBase(object):
         return (easy_model.intercept_,
                 sorted(zip(used_features, easy_model.coef_),
                        key=lambda x: np.abs(x[1]), reverse=True),
-                prediction_score, local_pred, used_features, active, test_result)
+                prediction_score, local_pred, used_features, test_result)
 

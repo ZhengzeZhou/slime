@@ -473,16 +473,17 @@ class LimeTabularExplainer(object):
         return ret_exp
 
     def testing_explain_instance(self,
-                         data_row,
-                         predict_fn,
-                         labels=(1,),
-                         top_labels=None,
-                         num_features=10,
-                         num_samples=5000,
-                         distance_metric='euclidean',
-                         model_regressor=None,
-                         sampling_method='gaussian'):
-        """Generates explanations for a prediction.
+                                 data_row,
+                                 predict_fn,
+                                 labels=(1,),
+                                 top_labels=None,
+                                 num_features=10,
+                                 num_samples=5000,
+                                 distance_metric='euclidean',
+                                 model_regressor=None,
+                                 sampling_method='gaussian',
+                                 alpha=0.05):
+        """Generates explanations for a prediction. This is a helper function for slime.
 
         First, we generate neighborhood data by randomly perturbing features
         from the instance (see __data_inverse). We then learn locally weighted
@@ -511,6 +512,7 @@ class LimeTabularExplainer(object):
                 and 'sample_weight' as a parameter to model_regressor.fit()
             sampling_method: Method to sample synthetic data. Defaults to Gaussian
                 sampling. Can also use Latin Hypercube Sampling.
+            alpha: significance level of hypothesis testing. 
 
         Returns:
             An Explanation object (see explanation.py) with the corresponding
@@ -633,8 +635,7 @@ class LimeTabularExplainer(object):
              ret_exp.local_exp[label],
              ret_exp.score[label],
              ret_exp.local_pred[label],
-             used_features, 
-             active, 
+             used_features,  
              test_result) = self.base.testing_explain_instance_with_data(
                     scaled_data,
                     yss,
@@ -642,22 +643,81 @@ class LimeTabularExplainer(object):
                     label,
                     num_features,
                     model_regressor=model_regressor,
-                    feature_selection=self.feature_selection)
+                    feature_selection=self.feature_selection,
+                    alpha=alpha)
 
         if self.mode == "regression":
             ret_exp.intercept[1] = ret_exp.intercept[0]
             ret_exp.local_exp[1] = [x for x in ret_exp.local_exp[0]]
             ret_exp.local_exp[0] = [(i, -1 * j) for i, j in ret_exp.local_exp[1]]
 
-        return ret_exp, active, test_result
+        return ret_exp, test_result
 
-    def slime(self, data_row, predict_fn, num_features=5, num_samples=1000, n_max=10000):
+    def slime(self, 
+              data_row, 
+              predict_fn, 
+              labels=(1,),
+              top_labels=None,
+              num_features=10, 
+              num_samples=1000,
+              distance_metric='euclidean',
+              model_regressor=None,
+              sampling_method='gaussian', 
+              n_max=10000, 
+              alpha=0.05,
+              tol=1e-3):
+        """Generates explanations for a prediction with S-LIME.
+
+        First, we generate neighborhood data by randomly perturbing features
+        from the instance (see __data_inverse). We then learn locally weighted
+        linear models on this neighborhood data to explain each of the classes
+        in an interpretable way (see lime_base.py).
+
+        Args:
+            data_row: 1d numpy array or scipy.sparse matrix, corresponding to a row
+            predict_fn: prediction function. For classifiers, this should be a
+                function that takes a numpy array and outputs prediction
+                probabilities. For regressors, this takes a numpy array and
+                returns the predictions. For ScikitClassifiers, this is
+                `classifier.predict_proba()`. For ScikitRegressors, this
+                is `regressor.predict()`. The prediction function needs to work
+                on multiple feature vectors (the vectors randomly perturbed
+                from the data_row).
+            labels: iterable with labels to be explained.
+            top_labels: if not None, ignore labels and produce explanations for
+                the K labels with highest prediction probabilities, where K is
+                this parameter.
+            num_features: maximum number of features present in explanation
+            num_samples: size of the neighborhood to learn the linear model as a start
+            distance_metric: the distance metric to use for weights.
+            model_regressor: sklearn regressor to use in explanation. Defaults
+                to Ridge regression in LimeBase. Must have model_regressor.coef_
+                and 'sample_weight' as a parameter to model_regressor.fit()
+            sampling_method: Method to sample synthetic data. Defaults to Gaussian
+                sampling. Can also use Latin Hypercube Sampling.
+            n_max: maximum number of sythetic samples to generate.
+            alpha: significance level of hypothesis testing. 
+            tol: tolerence level of hypothesis testing.
+
+        Returns:
+            An Explanation object (see explanation.py) with the corresponding
+            explanations.
+        """
 
         while True:
-            ret_exp, active, test_result = self.testing_explain_instance(data_row = data_row, predict_fn = predict_fn, num_features = num_features, num_samples = num_samples)
+            ret_exp, test_result = self.testing_explain_instance(data_row=data_row, 
+                                                                 predict_fn=predict_fn, 
+                                                                 labels=labels,
+                                                                 top_labels=top_labels,
+                                                                 num_features=num_features, 
+                                                                 num_samples = num_samples,
+                                                                 distance_metric=distance_metric,
+                                                                 model_regressor=model_regressor,
+                                                                 sampling_method=sampling_method,
+                                                                 alpha=alpha)
             flag = False
             for k in range(1, num_features + 1):
-                if test_result[k][0] < -1e-3:
+                if test_result[k][0] < -tol:
                     flag = True
                     break
             if flag and num_samples != n_max:
