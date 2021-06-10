@@ -30,6 +30,9 @@ S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_
 
 ![demo2](doc/images/demo2.png)
 
+## Notebooks
+
+- [Breast Cancer Data](https://marcotcr.github.io/lime/tutorials/Using%2Blime%2Bfor%2Bregression.html)
 
 
 
