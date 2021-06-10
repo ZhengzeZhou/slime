@@ -32,7 +32,7 @@ S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_
 
 ## Notebooks
 
-- [Breast Cancer Data](https://marcotcr.github.io/lime/tutorials/Using%2Blime%2Bfor%2Bregression.html)
+- [Breast Cancer Data](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/Breast%20Cancer%20Data.ipynb)
 
 
 
