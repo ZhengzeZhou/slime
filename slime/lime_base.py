@@ -5,7 +5,7 @@ import numpy as np
 import scipy as sp
 import sklearn
 from sklearn.linear_model import Ridge
-from lm._least_angle import lars_path
+from slime_lm._least_angle import lars_path
 from sklearn.utils import check_random_state
 
 
