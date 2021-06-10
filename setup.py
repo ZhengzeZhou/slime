@@ -7,7 +7,7 @@ setup(name='slime',
       author='Zhengze Zhou',
       author_email='zz433@cornell.edu',
       license='BSD',
-      packages=['slime', 'lm'],
+      ackages=find_packages(exclude=['js', 'node_modules', 'tests']),
       python_requires='>=3.5',
       install_requires=[
           'lime',
