@@ -19,3 +19,7 @@ pip install .
 ## Usage
 
 Currently, S-LIME only support tabular data and when feature selection method is set to "lasso_path".
+
+The following screenshot shows a typical usage of LIME using breasd cancer data. 
+
+![demo1](doc/images/demo1.png)
