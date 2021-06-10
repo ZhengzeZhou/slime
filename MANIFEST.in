@@ -1,2 +1,2 @@
-include lime/*.js
+include slime/*.js
 include LICENSE
