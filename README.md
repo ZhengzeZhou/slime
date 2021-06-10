@@ -20,6 +20,10 @@ pip install .
 
 Currently, S-LIME only support tabular data and when feature selection method is set to "lasso_path".
 
-The following screenshot shows a typical usage of LIME using breasd cancer data. 
+The following screenshot shows a typical usage of LIME using breasd cancer data. We can easily observe that two runs of the explanation algorithms result in different features being selected.
 
 ![demo1](doc/images/demo1.png)
+
+S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_instance**. *n_max* indicates the maximum number of sythetic samples to generate and **alpha** denotes the significance level of hypothesis testing. 
+
+![demo2](doc/images/demo2.png)
