@@ -1,5 +1,5 @@
 {
-  "name": "slime",
+  "name": "lime",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/marcotcr/lime.git"
   },
-  "author": "Zhengze Zhou <zz433@cornell.edu>",
+  "author": "Marco Tulio Ribeiro <marcotcr@gmail.com>",
   "license": "TODO",
   "bugs": {
     "url": "https://github.com/marcotcr/lime/issues"
