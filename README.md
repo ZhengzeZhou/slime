@@ -4,6 +4,10 @@ This repository holds code for replicating experiments in papar [S-LIME: Stabili
 
 The repository is built on the implementation of [lime](https://github.com/marcotcr/lime) with added functionalities. It is still under development. 
 
+## Introduction
+
+It has been shown that post hoc explanations based on perturbations (such as LIME) exhibit large instability, posing serious challenges to the effectiveness of the method itself and harming user trust. S-LIME stands for Stabilized-LIME, which utilizes a hypothesis testing framework based on central limit theorem for determining the number of perturbation points needed to guarantee stability of the resulting explanation. 
+
 ## Installation
 
 clone the repository and run:
@@ -13,3 +17,5 @@ pip install .
 ```
 
 ## Usage
+
+Currently, S-LIME only support tabular data and when feature selection method is set to "lasso_path".
