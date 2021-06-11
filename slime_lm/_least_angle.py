@@ -546,6 +546,9 @@ def _lars_path_solver(
                                 if testing_verbose:
                                     print("Not enough samples!")
                                 return alphas, active, coefs.T, test_result
+                    else:
+                        test_result[n_active + 1] = [0, 0]
+
                 C_ = Cov[C_idx]
 
                 if positive:
