@@ -548,6 +548,7 @@ def _lars_path_solver(
                                 return alphas, active, coefs.T, test_result
                     else:
                         test_result[n_active + 1] = [0, 0]
+                        print(test_result)
 
                 C_ = Cov[C_idx]
 
