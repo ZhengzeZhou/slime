@@ -33,6 +33,6 @@ S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_
 ## Notebooks
 
 - [Breast Cancer Data](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/Breast%20Cancer%20Data.ipynb)
-
+- [MARS](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/MARS.ipynb)
 
 
