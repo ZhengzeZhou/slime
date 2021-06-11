@@ -511,6 +511,9 @@ def _lars_path_solver(
                         u = np.array([np.dot(x1, residual), np.dot(x2, residual)]) / len(y) 
                         cov = np.cov(x1 * residual, x2 * residual)
 
+                        print(u)
+                        print(cov)
+
                         new_n = len(y)
                         z_score = stats.norm.ppf(1 - alpha)
                         if u[0] >= 0 and u[1] >= 0:
