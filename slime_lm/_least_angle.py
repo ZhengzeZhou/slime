@@ -495,6 +495,7 @@ def _lars_path_solver(
             else:
                 C = 0.
         else:
+            z_score = stats.norm.ppf(1 - alpha)
             # not implemented when if positive is set to True
             if Cov.size:
                 if positive:
@@ -511,12 +512,7 @@ def _lars_path_solver(
                         u = np.array([np.dot(x1, residual), np.dot(x2, residual)]) / len(y) 
                         cov = np.cov(x1 * residual, x2 * residual)
 
-                        print(u)
-                        print(cov)
-
                         new_n = len(y)
-                        z_score = stats.norm.ppf(1 - alpha)
-                        print(z_score)
                         if u[0] >= 0 and u[1] >= 0:
                             test_stats = u[0] - u[1] - z_score * np.sqrt(2 * (cov[0][0] + cov[1][1] - cov[0][1] - cov[1][0]) / len(y))
                             if test_stats < 0:
