@@ -2,7 +2,7 @@
 
 This repository holds code for replicating experiments in papar [S-LIME: Stabilized-LIME for Model Explanation]() to appear in [KDD2021](https://www.kdd.org/kdd2021/). 
 
-The repository is built on the implementation of [lime](https://github.com/marcotcr/lime) with added functionalities. It is still under development. 
+It is built on the implementation of [LIME](https://github.com/marcotcr/lime) with added functionalities.
 
 ## Introduction
 
@@ -10,20 +10,29 @@ It has been shown that post hoc explanations based on perturbations (such as LIM
 
 ## Installation
 
-clone the repository and run:
+clone the repository and install using pip:
 
 ```sh
+git clone https://github.com/ZhengzeZhou/slime.git
+cd slime
 pip install .
 ```
 
 ## Usage
 
-Currently, S-LIME only support tabular data and when feature selection method is set to "lasso_path".
+Currently, S-LIME only support tabular data and when feature selection method is set to "lasso_path". We are woring on extending the use cases to other data types and feature selection methods. 
 
-The following screenshot shows a typical usage of LIME using breasd cancer data. We can easily observe that two runs of the explanation algorithms result in different features being selected.
+The following screenshot shows a typical usage of LIME on breasd cancer data. We can easily observe that two runs of the explanation algorithms result in different features being selected.
 
 ![demo1](doc/images/demo1.png)
 
-S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_instance**. *n_max* indicates the maximum number of sythetic samples to generate and **alpha** denotes the significance level of hypothesis testing. 
+S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_instance**. *n_max* indicates the maximum number of sythetic samples to generate and *alpha* denotes the significance level of hypothesis testing. S-LIME explanations are guranteed to be stable under high probability. 
 
 ![demo2](doc/images/demo2.png)
+
+## Notebooks
+
+- [Breast Cancer Data](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/Breast%20Cancer%20Data.ipynb)
+
+
+
