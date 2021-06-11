@@ -502,6 +502,7 @@ def _lars_path_solver(
                 else:
                     C_idx = np.argmax(np.abs(Cov))
                     if Cov.size > 1:
+                        print(Cov.size)
                         C_idx_second = np.abs(Cov).argsort()[-2]
 
                         x1 = X.T[n_active + C_idx]
