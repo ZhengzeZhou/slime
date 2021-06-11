@@ -478,6 +478,7 @@ def _lars_path_solver(
         Gram_copy = Gram.copy()
         Cov_copy = Cov.copy()
 
+    z_score = stats.norm.ppf(1 - alpha)
     while True:
         if not testing:
             if Cov.size:
@@ -495,7 +496,6 @@ def _lars_path_solver(
             else:
                 C = 0.
         else:
-            z_score = stats.norm.ppf(1 - alpha)
             # not implemented when if positive is set to True
             if Cov.size:
                 if positive:
