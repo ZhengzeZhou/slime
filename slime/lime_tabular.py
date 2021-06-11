@@ -715,6 +715,7 @@ class LimeTabularExplainer(object):
                                                                  model_regressor=model_regressor,
                                                                  sampling_method=sampling_method,
                                                                  alpha=alpha)
+            print(test_result)
             flag = False
             for k in range(1, num_features + 1):
                 if test_result[k][0] < -tol:
