@@ -321,7 +321,7 @@ class LimeImageExplainer(object):
                 data, labels, distances, label, num_features,
                 model_regressor=model_regressor,
                 feature_selection=self.feature_selection,
-                aplha=alpha)
+                alpha=alpha)
         return ret_exp
 
     def data_labels(self,
