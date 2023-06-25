@@ -230,7 +230,6 @@ class LimeImageExplainer(object):
                          segmentation_fn=None,
                          distance_metric='cosine',
                          model_regressor=None,
-                         sampling_method='gaussian',
                          alpha=0.05,
                          random_seed=None,
                          progress_bar=True):
@@ -376,18 +375,19 @@ class LimeImageExplainer(object):
         return data, np.array(labels)
 
     def slime(self,
-              data_row,
-              predict_fn,
-              labels=(1,),
-              top_labels=None,
-              num_features=10,
-              num_samples=1000,
-              distance_metric='euclidean',
+              image, classifier_fn, labels=(1,),
+              hide_color=None,
+              top_labels=5, num_features=100000, num_samples=1000,
+              batch_size=10,
+              segmentation_fn=None,
+              distance_metric='cosine',
               model_regressor=None,
-              sampling_method='gaussian',
               n_max=10000,
               alpha=0.05,
-              tol=1e-3):
+              tol=1e-3,
+              random_seed=None,
+              progress_bar=True
+              ):
         """Generates explanations for a prediction with S-LIME.
 
         First, we generate neighborhood data by randomly perturbing features
@@ -427,16 +427,20 @@ class LimeImageExplainer(object):
         """
 
         while True:
-            ret_exp, test_result = self.testing_explain_instance(data_row=data_row,
-                                                                 predict_fn=predict_fn,
+            ret_exp, test_result = self.testing_explain_instance(image=image,
+                                                                 classifier_fn=classifier_fn,
                                                                  labels=labels,
+                                                                 hide_color=hide_color,
                                                                  top_labels=top_labels,
                                                                  num_features=num_features,
                                                                  num_samples=num_samples,
+                                                                 batch_size=batch_size,
+                                                                 segmentation_fn=segmentation_fn,
                                                                  distance_metric=distance_metric,
                                                                  model_regressor=model_regressor,
-                                                                 sampling_method=sampling_method,
-                                                                 alpha=alpha)
+                                                                 alpha=alpha,
+                                                                 random_seed=random_seed,
+                                                                 progress_bar=progress_bar)
             flag = False
             for k in range(1, num_features + 1):
                 if test_result[k][0] < -tol:
