@@ -223,6 +223,108 @@ class LimeImageExplainer(object):
                 feature_selection=self.feature_selection)
         return ret_exp
 
+    def testing_explain_instance(self, image, classifier_fn, labels=(1,),
+                         hide_color=None,
+                         top_labels=5, num_features=100000, num_samples=1000,
+                         batch_size=10,
+                         segmentation_fn=None,
+                         distance_metric='cosine',
+                         model_regressor=None,
+                         sampling_method='gaussian',
+                         alpha=0.05,
+                         random_seed=None,
+                         progress_bar=True):
+        """Generates explanations for a prediction.
+
+        First, we generate neighborhood data by randomly perturbing features
+        from the instance (see __data_inverse). We then learn locally weighted
+        linear models on this neighborhood data to explain each of the classes
+        in an interpretable way (see lime_base.py).
+
+        Args:
+            image: 3 dimension RGB image. If this is only two dimensional,
+                we will assume it's a grayscale image and call gray2rgb.
+            classifier_fn: classifier prediction probability function, which
+                takes a numpy array and outputs prediction probabilities.  For
+                ScikitClassifiers , this is classifier.predict_proba.
+            labels: iterable with labels to be explained.
+            hide_color: TODO
+            top_labels: if not None, ignore labels and produce explanations for
+                the K labels with highest prediction probabilities, where K is
+                this parameter.
+            num_features: maximum number of features present in explanation
+            num_samples: size of the neighborhood to learn the linear model
+            batch_size: TODO
+            distance_metric: the distance metric to use for weights.
+            model_regressor: sklearn regressor to use in explanation. Defaults
+            to Ridge regression in LimeBase. Must have model_regressor.coef_
+            and 'sample_weight' as a parameter to model_regressor.fit()
+            segmentation_fn: SegmentationAlgorithm, wrapped skimage
+            segmentation function
+            random_seed: integer used as random seed for the segmentation
+                algorithm. If None, a random integer, between 0 and 1000,
+                will be generated using the internal random number generator.
+            progress_bar: if True, show tqdm progress bar.
+
+        Returns:
+            An ImageExplanation object (see lime_image.py) with the corresponding
+            explanations.
+        """
+        if len(image.shape) == 2:
+            image = gray2rgb(image)
+        if random_seed is None:
+            random_seed = self.random_state.randint(0, high=1000)
+
+        if segmentation_fn is None:
+            segmentation_fn = SegmentationAlgorithm('quickshift', kernel_size=4,
+                                                    max_dist=200, ratio=0.2,
+                                                    random_seed=random_seed)
+        try:
+            segments = segmentation_fn(image)
+        except ValueError as e:
+            raise e
+
+        fudged_image = image.copy()
+        if hide_color is None:
+            for x in np.unique(segments):
+                fudged_image[segments == x] = (
+                    np.mean(image[segments == x][:, 0]),
+                    np.mean(image[segments == x][:, 1]),
+                    np.mean(image[segments == x][:, 2]))
+        else:
+            fudged_image[:] = hide_color
+
+        top = labels
+
+        data, labels = self.data_labels(image, fudged_image, segments,
+                                        classifier_fn, num_samples,
+                                        batch_size=batch_size,
+                                        progress_bar=progress_bar)
+
+        distances = sklearn.metrics.pairwise_distances(
+            data,
+            data[0].reshape(1, -1),
+            metric=distance_metric
+        ).ravel()
+
+        ret_exp = ImageExplanation(image, segments)
+        if top_labels:
+            top = np.argsort(labels[0])[-top_labels:]
+            ret_exp.top_labels = list(top)
+            ret_exp.top_labels.reverse()
+        for label in top:
+            (ret_exp.intercept[label],
+             ret_exp.local_exp[label],
+             ret_exp.score[label],
+             ret_exp.local_pred[label],
+             used_features,
+             test_result) = self.base.testing_explain_instance_with_data(
+                data, labels, distances, label, num_features,
+                model_regressor=model_regressor,
+                feature_selection=self.feature_selection,
+                aplha=alpha)
+        return ret_exp
+
     def data_labels(self,
                     image,
                     fudged_image,
@@ -272,3 +374,79 @@ class LimeImageExplainer(object):
             preds = classifier_fn(np.array(imgs))
             labels.extend(preds)
         return data, np.array(labels)
+
+    def slime(self,
+              data_row,
+              predict_fn,
+              labels=(1,),
+              top_labels=None,
+              num_features=10,
+              num_samples=1000,
+              distance_metric='euclidean',
+              model_regressor=None,
+              sampling_method='gaussian',
+              n_max=10000,
+              alpha=0.05,
+              tol=1e-3):
+        """Generates explanations for a prediction with S-LIME.
+
+        First, we generate neighborhood data by randomly perturbing features
+        from the instance (see __data_inverse). We then learn locally weighted
+        linear models on this neighborhood data to explain each of the classes
+        in an interpretable way (see lime_base.py).
+
+        Args:
+            data_row: 1d numpy array or scipy.sparse matrix, corresponding to a row
+            predict_fn: prediction function. For classifiers, this should be a
+                function that takes a numpy array and outputs prediction
+                probabilities. For regressors, this takes a numpy array and
+                returns the predictions. For ScikitClassifiers, this is
+                `classifier.predict_proba()`. For ScikitRegressors, this
+                is `regressor.predict()`. The prediction function needs to work
+                on multiple feature vectors (the vectors randomly perturbed
+                from the data_row).
+            labels: iterable with labels to be explained.
+            top_labels: if not None, ignore labels and produce explanations for
+                the K labels with highest prediction probabilities, where K is
+                this parameter.
+            num_features: maximum number of features present in explanation
+            num_samples: size of the neighborhood to learn the linear model as a start
+            distance_metric: the distance metric to use for weights.
+            model_regressor: sklearn regressor to use in explanation. Defaults
+                to Ridge regression in LimeBase. Must have model_regressor.coef_
+                and 'sample_weight' as a parameter to model_regressor.fit()
+            sampling_method: Method to sample synthetic data. Defaults to Gaussian
+                sampling. Can also use Latin Hypercube Sampling.
+            n_max: maximum number of sythetic samples to generate.
+            alpha: significance level of hypothesis testing.
+            tol: tolerence level of hypothesis testing.
+
+        Returns:
+            An Explanation object (see explanation.py) with the corresponding
+            explanations.
+        """
+
+        while True:
+            ret_exp, test_result = self.testing_explain_instance(data_row=data_row,
+                                                                 predict_fn=predict_fn,
+                                                                 labels=labels,
+                                                                 top_labels=top_labels,
+                                                                 num_features=num_features,
+                                                                 num_samples=num_samples,
+                                                                 distance_metric=distance_metric,
+                                                                 model_regressor=model_regressor,
+                                                                 sampling_method=sampling_method,
+                                                                 alpha=alpha)
+            flag = False
+            for k in range(1, num_features + 1):
+                if test_result[k][0] < -tol:
+                    flag = True
+                    break
+            if flag and num_samples != n_max:
+                num_samples = min(int(test_result[k][1]), 2 * num_samples)
+                if num_samples > n_max:
+                    num_samples = n_max
+            else:
+                break
+
+        return ret_exp
