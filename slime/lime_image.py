@@ -223,7 +223,7 @@ class LimeImageExplainer(object):
                 feature_selection=self.feature_selection)
         return ret_exp
 
-    def t(self, image, classifier_fn, labels=(1,),
+    def testing_explain_instance(self, image, classifier_fn, labels=(1,),
                          hide_color=None,
                          top_labels=5, num_features=100000, num_samples=1000,
                          batch_size=10,
