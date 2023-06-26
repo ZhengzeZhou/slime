@@ -223,7 +223,7 @@ class LimeImageExplainer(object):
                 feature_selection=self.feature_selection)
         return ret_exp
 
-    def testing_explain_instance(self, image, classifier_fn, labels=(1,),
+    def t(self, image, classifier_fn, labels=(1,),
                          hide_color=None,
                          top_labels=5, num_features=100000, num_samples=1000,
                          batch_size=10,
@@ -442,7 +442,7 @@ class LimeImageExplainer(object):
                                                                  random_seed=random_seed,
                                                                  progress_bar=progress_bar)
             flag = False
-            for k in range(1, num_features + 1):
+            for k in range(1, num_features):  # changes num_features + 1 to num_features because it fixes bug
                 if test_result[k][0] < -tol:
                     flag = True
                     break
