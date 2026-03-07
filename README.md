@@ -10,7 +10,13 @@ It has been shown that post hoc explanations based on perturbations (such as LIM
 
 ## Installation
 
-clone the repository and install using pip:
+Install from PyPI:
+
+```sh
+pip install stabilized-lime
+```
+
+Or clone the repository and install locally:
 
 ```sh
 git clone https://github.com/ZhengzeZhou/slime.git
