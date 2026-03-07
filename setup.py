@@ -1,8 +1,13 @@
 from setuptools import setup, find_packages
 
-setup(name='slime',
-      version='0.1',
+with open('README.md', 'r', encoding='utf-8') as fh:
+    long_description = fh.read()
+
+setup(name='s-lime',
+      version='0.1.0',
       description='Stabilized-LIME for Model Explanation',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       url='https://github.com/ZhengzeZhou/slime',
       author='Zhengze Zhou',
       author_email='zz433@cornell.edu',
@@ -22,5 +27,12 @@ setup(name='slime',
       extras_require={
           'dev': ['pytest', 'flake8'],
       },
+      classifiers=[
+          'Programming Language :: Python :: 3',
+          'License :: OSI Approved :: BSD License',
+          'Operating System :: OS Independent',
+          'Intended Audience :: Science/Research',
+          'Topic :: Scientific/Engineering :: Artificial Intelligence',
+      ],
       include_package_data=True,
       zip_safe=False)
