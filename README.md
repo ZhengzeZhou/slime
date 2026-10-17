@@ -19,7 +19,7 @@ pip install stabilized-lime
 Or clone the repository and install locally:
 
 ```sh
-git clone https://github.com/ZhengzeZhou/slime.git
+git clone https://github.com/zzzworks/slime.git
 cd slime
 pip install .
 ```
@@ -38,8 +38,7 @@ S-LIME is invoked by calling **explainer.slime** instead of **explainer.explain_
 
 ## Notebooks
 
-- [Breast Cancer Data](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/Breast%20Cancer%20Data.ipynb)
-- [MARS](https://github.com/ZhengzeZhou/slime/blob/main/doc/notebooks/MARS.ipynb)
+- [Breast Cancer Data](https://github.com/zzzworks/slime/blob/main/doc/notebooks/Breast%20Cancer%20Data.ipynb)
+- [MARS](https://github.com/zzzworks/slime/blob/main/doc/notebooks/MARS.ipynb)
 - [Dog Images](https://github.com/joangog/slime/blob/main/doc/notebooks/Dogs.ipynb)
-
 
